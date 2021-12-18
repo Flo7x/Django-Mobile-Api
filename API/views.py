@@ -112,8 +112,6 @@ def login(request):
 @csrf_exempt
 @api_view(['GET'])
 def get_all_countries(request):
-    errors = Error()
-
     countries = Countries.objects.all()
 
     data = []
@@ -122,6 +120,31 @@ def get_all_countries(request):
             JsonKey.Countries.ID: item.id,
             JsonKey.Countries.TITLE: item.title,
             JsonKey.Countries.PREFIX: item.prefix
+        })
+
+    result = json.dumps(data)
+
+    return JsonResponse(result, status=status.HTTP_200_OK, safe=False)
+
+@csrf_exempt
+@api_view(['GET'])
+def get_all_types(request):
+    params = JSONParser().parse(request)
+    userprofile_id = params.get(JsonKey.USERPROFILE_ID)
+    errors = Error()
+
+    if (userprofile_id == None):
+        errors.append(ErrorMessages.NOT_FOUND_REQUIRED_PARAMS)
+        return JsonResponse({JsonKey.ERRORS: errors.messages}, status=status.HTTP_400_BAD_REQUEST)
+
+    types = Types.objects.all()
+
+    data = []
+    for item in types:
+        data.append({
+            JsonKey.Types.ID: item.id,
+            JsonKey.Types.TITLE: item.title,
+            JsonKey.Types.EN_TITLE: item.en_title
         })
 
     result = json.dumps(data)
@@ -194,7 +217,6 @@ def show_histories(request, userprofile_id):
     print(histories)
     data = []
 
-
     for item in histories:
         data.append({
         JsonKey.Histories.ID: item.id,
@@ -212,7 +234,7 @@ def show_histories(request, userprofile_id):
         },
         JsonKey.Histories.TYPE: {
             JsonKey.Types.ID: item.type.id,
-            JsonKey.Types.RU_TITLE: Helpers.translate_language("ru", user.country.prefix, item.type.ru_title),
+            JsonKey.Types.TITLE: Helpers.translate_language("en", user.country.prefix, item.type.en_title),
             JsonKey.Types.EN_TITLE: item.type.en_title
         }
     })
@@ -246,7 +268,7 @@ def get_random_fact(request, type):
 
     params = JSONParser().parse(request)
 
-    userprofile_id = params.get("userprofile_id")
+    userprofile_id = params.get(JsonKey.USERPROFILE_ID)
 
     headers = {
         "Content-Type": "application/json"
@@ -285,7 +307,7 @@ def get_random_fact(request, type):
         JsonKey.Fact.TEXT: Helpers.translate_language("en", user.country.prefix, history.description),
         JsonKey.Fact.TYPE: {
             JsonKey.Types.ID: type.id,
-            JsonKey.Types.RU_TITLE: Helpers.translate_language("ru", user.country.prefix, type.ru_title),
+            JsonKey.Types.TITLE: Helpers.translate_language("en", user.country.prefix, type.en_title),
             JsonKey.Types.EN_TITLE: type.en_title
         }
     }
@@ -299,7 +321,7 @@ def get_fact_by_type(request, type, number):
 
     params = JSONParser().parse(request)
 
-    userprofile_id = params.get("userprofile_id")
+    userprofile_id = params.get(JsonKey.USERPROFILE_ID)
 
     headers = {
         "Content-Type": "application/json"
@@ -329,7 +351,7 @@ def get_fact_by_type(request, type, number):
         JsonKey.Fact.TEXT: Helpers.translate_language("en", user.country.prefix, history.description),
         JsonKey.Fact.TYPE: {
             JsonKey.Types.ID: type.id,
-            JsonKey.Types.RU_TITLE: Helpers.translate_language("ru", user.country.prefix, type.ru_title),
+            JsonKey.Types.TITLE: Helpers.translate_language("en", user.country.prefix, type.en_title),
             JsonKey.Types.EN_TITLE: type.en_title
         }
     }
