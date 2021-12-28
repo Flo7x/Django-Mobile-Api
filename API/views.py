@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from django.forms.models import model_to_dict
 from django.core import serializers
 import json
+from .serializers import CountriesSerializer
 
 from .Helpers import Helpers
 from .constant.ApiUrl import ApiUrl
@@ -125,6 +126,10 @@ def get_all_countries(request):
     result = json.dumps(data)
 
     return JsonResponse(result, status=status.HTTP_200_OK, safe=False)
+class CountriesViewSet(viewsets.ModelViewSet):
+    queryset = Countries.objects.all()
+    serializer_class = CountriesSerializer
+
 
 @csrf_exempt
 @api_view(['GET'])
